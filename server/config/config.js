@@ -1,11 +1,13 @@
- const config = {
- env: process.env.NODE_ENV || 'development', 
- port: process.env.PORT || 3000,
- jwtSecret: process.env.JWT_SECRET || "YOUR_secret_key", 
- mongoUri: process.env.MONGODB_URI ||"mongodb+srv://adenzahra98_db_user:Water89@cluster0.paci1yh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"||
- process.env.MONGO_HOST ||
- 'mongodb://' + (process.env.IP || 'localhost') + ':' + 
-(process.env.MONGO_PORT || '27017') +
- '/mernproject' 
- }
- export default config
+import dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config({ path: path.resolve('./server/.env') }); // ensures it reads server/.env
+
+const config = {
+  env: process.env.NODE_ENV || 'development',
+  port: process.env.PORT || 3000,
+  mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/mernproject',
+  jwtSecret: process.env.JWT_SECRET || 'YOUR_default_secret'
+};
+
+export default config;

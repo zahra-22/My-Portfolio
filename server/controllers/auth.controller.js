@@ -1,7 +1,7 @@
 import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import config from "../config/config.js";
+import config from "../../my-portfolio/config/config.js";
 
 // Sign up (optional if you already have user creation in user.controller)
 export const signUp = async (req, res) => {
