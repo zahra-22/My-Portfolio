@@ -1,11 +1,21 @@
 import express from "express";
 import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/userRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js";
+import qualificationRoutes from "./routes/qualificationRoutes.js";
 import { requireSignIn } from "./controllers/auth.controller.js";
 
 const app = express();
+
+// Middleware
 app.use(express.json());
 
-app.use("/api/auth", authRoutes);
+// Register API routes
+app.use("/api/users", userRoutes);
+app.use("/api/contacts", contactRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/qualifications", qualificationRoutes);
 app.use("/api/auth", authRoutes);
 
 // Example protected route
