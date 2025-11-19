@@ -1,16 +1,21 @@
 import express from "express";
 import {
-  getAllContacts, getContactById, createContact,
-  updateContact, deleteContact, deleteAllContacts
+  createContact,
+  getContacts,
+  deleteContact
 } from "../controllers/contact.controller.js";
+import authMiddleware from "../middleware/auth.middleware.js";
+import isAdmin from "../middleware/admin.middleware.js";
 
 const router = express.Router();
 
-router.get("/", getAllContacts);
-router.get("/:id", getContactById);
+// USER — submit contact form (public)
 router.post("/", createContact);
-router.put("/:id", updateContact);
-router.delete("/:id", deleteContact);
-router.delete("/", deleteAllContacts);
+
+// ADMIN — view all contacts
+router.get("/", authMiddleware, isAdmin, getContacts);
+
+// ADMIN — delete a message
+router.delete("/:id", authMiddleware, isAdmin, deleteContact);
 
 export default router;

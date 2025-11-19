@@ -1,21 +1,22 @@
 import express from "express";
 import {
   getAllQualifications,
-  getQualificationById,
   createQualification,
-  updateQualification,
-  deleteQualification,
-  deleteAllQualifications
-} from "../controllers/qualification.controller.js"; // <-- match filename exactly
+  deleteQualification
+} from "../controllers/qualification.controller.js";
 
+import authMiddleware from "../middleware/auth.middleware.js";
+import isAdmin from "../middleware/admin.middleware.js";
 
 const router = express.Router();
 
+// PUBLIC — View qualifications
 router.get("/", getAllQualifications);
-router.get("/:id", getQualificationById);
-router.post("/", createQualification);
-router.put("/:id", updateQualification);
-router.delete("/:id", deleteQualification);
-router.delete("/", deleteAllQualifications);
+
+// ADMIN — Create
+router.post("/", authMiddleware, isAdmin, createQualification);
+
+// ADMIN — Delete
+router.delete("/:id", authMiddleware, isAdmin, deleteQualification);
 
 export default router;

@@ -1,0 +1,23 @@
+[33mcommit 72782a0fda90c07f49a726eef2ebeeb5bcf698ff[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: zahra-22 <zahraaden22@hotmail.com>
+Date:   Mon Oct 27 13:46:51 2025 -0400
+
+    Fixed backend models, controllers, and auth setup
+
+[33mcommit c41a9bc140e0a3954e7dfa2de721328ede1572e6[m
+Author: zahra-22 <zahraaden22@hotmail.com>
+Date:   Mon Oct 20 16:59:39 2025 -0400
+
+    Remove .env from repository
+
+[33mcommit a7ab2dd47db2c878c0a5e59ef8fdb2857b9bb218[m
+Author: zahra-22 <zahraaden22@hotmail.com>
+Date:   Mon Oct 20 16:57:47 2025 -0400
+
+    Final backend setup: authentication, routes, and server working
+
+[33mcommit a230d4adbaa79cd502d0dd5a4e5598d5e5bf0654[m
+Author: zahra-22 <zahraaden22@hotmail.com>
+Date:   Mon Oct 20 16:42:48 2025 -0400
+
+    Initial commit - My Portfolio project

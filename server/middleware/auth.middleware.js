@@ -1,14 +1,23 @@
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 
-export const requireSignin = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ message: "No token provided" });
+export default function authMiddleware(req, res, next) {
+  const token =
+    req.cookies?.jwt ||
+    req.headers.authorization?.split(" ")[1]; // supports mobile & API tools
 
-  const token = authHeader.split(" ")[1]; // Bearer <token>
-  jwt.verify(token, config.jwtSecret, (err, decoded) => {
-    if (err) return res.status(401).json({ message: "Invalid token" });
-    req.user = decoded; // { _id: ... }
+  // ⭐ Allow public access on missing cookie
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, config.jwtSecret);
+    req.user = decoded; // { id, role }
     next();
-  });
-};
+  } catch (err) {
+    req.user = null;
+    next(); // allow public access but not admin actions
+  }
+}

@@ -1,69 +1,93 @@
-import User from "../models/user.model.js"; 
+import User from "../models/user.model.js";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 
-// Sign up
-export const signUp = async (req, res) => {
+// SIGNUP
+export const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { fullName, email, password, role } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "Email already exists" });
+    const exists = await User.findOne({ email });
+    if (exists)
+      return res.status(400).json({ message: "Email already registered" });
 
-    const user = new User({ name, email, password });
-    await user.save();
+    // Password hashing handled by Mongoose pre-save hook
+    const user = await User.create({
+      fullName,
+      email,
+      password,
+      role: role || "user"
+    });
 
-    res.status(201).json({ message: "User registered successfully", user: { _id: user._id, name: user.name, email: user.email } });
+    return res.status(201).json({
+      message: "Signup successful",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
-// Sign in
-export const signIn = async (req, res) => {
+// SIGNIN
+export const signin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
-    if (!user.authenticate(password)) {
-      return res.status(401).json({ message: "Email and password do not match" });
-    }
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ message: "Invalid credentials" });
 
-    // Generate JWT token
-    const token = jwt.sign({ _id: user._id }, config.jwtSecret, { expiresIn: "1h" });
+    // Generate token
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      config.jwtSecret,
+      { expiresIn: "7d" }
+    );
 
-    res.json({
-      message: "Signed in successfully",
-      token,
-      user: { _id: user._id, name: user.name, email: user.email }
+    // Store token in cookie — localhost-friendly settings
+   res.cookie("jwt", token, {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  path: "/",
+});
+
+
+
+    return res.json({
+      message: "Signin successful",
+      token, // helps frontend AuthContext
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role
+      }
     });
+
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
-// Sign out
-export const signOut = (req, res) => {
-  // JWT is stateless, so signout is handled on client-side
-  res.json({ message: "Signed out successfully" });
+// SIGNOUT
+export const signout = (req, res) => {
+  res.clearCookie("jwt", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    path: "/",
+  });
+
+  return res.status(200).json({ message: "Signout successful" });
 };
 
-// Middleware to protect routes
-export const requireSignIn = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ message: "Access denied. No token provided." });
-
-    const token = authHeader.split(" ")[1]; // expects "Bearer <token>"
-    if (!token) return res.status(401).json({ message: "Access denied. Invalid token." });
-
-    const decoded = jwt.verify(token, config.jwtSecret);
-    req.user = decoded; // attach user info to request
-    next();
-  } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
