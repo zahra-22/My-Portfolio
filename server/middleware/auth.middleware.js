@@ -6,7 +6,7 @@ export default function authMiddleware(req, res, next) {
     req.cookies?.jwt ||
     req.headers.authorization?.split(" ")[1]; // supports mobile & API tools
 
-  // ⭐ Allow public access on missing cookie
+  //  Allow public access on missing cookie
   if (!token) {
     req.user = null;
     return next();
