@@ -4,12 +4,10 @@ import config from "../config/config.js";
 export default function authMiddleware(req, res, next) {
   const token =
     req.cookies?.jwt ||
-    req.headers.authorization?.split(" ")[1]; // supports mobile & API tools
+    req.headers.authorization?.split(" ")[1];
 
-  //  Allow public access on missing cookie
   if (!token) {
-    req.user = null;
-    return next();
+    return res.status(401).json({ message: "Authentication required" });
   }
 
   try {
@@ -17,7 +15,6 @@ export default function authMiddleware(req, res, next) {
     req.user = decoded; // { id, role }
     next();
   } catch (err) {
-    req.user = null;
-    next(); // allow public access but not admin actions
+    return res.status(403).json({ message: "Invalid or expired token" });
   }
 }

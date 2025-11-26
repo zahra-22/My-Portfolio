@@ -13,6 +13,12 @@ import {
 
 const router = express.Router();
 
+// SELF — restore login
+router.get("/me", authMiddleware, (req, res) => {
+  if (!req.user) return res.status(401).json({ message: "Not authenticated" });
+  res.json(req.user);
+});
+
 // ADMIN ONLY — manage users
 router.post("/", authMiddleware, isAdmin, createUser);
 router.get("/", authMiddleware, isAdmin, getUsers);
