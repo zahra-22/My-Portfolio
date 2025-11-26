@@ -1,0 +1,8 @@
+import { render, screen } from "@testing-library/react";
+import Signin from "./Signin";
+
+test("renders Signin button", () => {
+  render(<Signin />);
+  const button = screen.getByRole("button", { name: /signin/i });
+  expect(button).toBeInTheDocument();
+});

@@ -1,0 +1,58 @@
+{
+  "name": "my-portfolio",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/user-event": "^13.5.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.19.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.6",
+    "react-scripts": "^5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "dev": "concurrently \"yarn start\" \"nodemon ../server.js\"",
+    "build": "react-scripts build",
+    "test": "jest",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "autoprefixer": "^10.4.21",
+    "babel-jest": "^30.2.0",
+    "concurrently": "^9.2.1",
+    "cypress": "^15.7.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jsdom": "^27.2.0",
+    "nodemon": "^3.1.10",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13",
+    "vitest": "^4.0.14"
+  }
+}
