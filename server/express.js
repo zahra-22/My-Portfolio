@@ -11,20 +11,29 @@ import authMiddleware from "./middleware/auth.middleware.js";
 
 const app = express();
 
-// Parse requests
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Allowed frontend URLs
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://zahra22-portfolio.netlify.app"
+];
 
-// Correct CORS (only the real frontend origin)
+// CORS setup
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
 
+// Allow cookies (JWT) across domains
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
 
-
+// Parse requests
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // AUTH routes — public
@@ -36,10 +45,10 @@ app.use("/api/contacts", contactRoutes);
 // USER — admin only
 app.use("/api/users", authMiddleware, userRoutes);
 
-// QUALIFICATIONS — user must be logged in; controller decides admin vs user
+// QUALIFICATIONS — user must be logged in
 app.use("/api/qualifications", authMiddleware, qualificationRoutes);
 
-// PROJECTS — user must be logged in; controller decides admin vs user
+// PROJECTS — user must be logged in
 app.use("/api/projects", authMiddleware, projectRoutes);
 
 export default app;

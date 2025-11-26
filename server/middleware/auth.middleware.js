@@ -6,8 +6,10 @@ export default function authMiddleware(req, res, next) {
     req.cookies?.jwt ||
     req.headers.authorization?.split(" ")[1];
 
+  // If no token → allow request but mark user as guest
   if (!token) {
-    return res.status(401).json({ message: "Authentication required" });
+    req.user = null;
+    return next();
   }
 
   try {
@@ -15,6 +17,8 @@ export default function authMiddleware(req, res, next) {
     req.user = decoded; // { id, role }
     next();
   } catch (err) {
-    return res.status(403).json({ message: "Invalid or expired token" });
+    // Token exists but is invalid → treat as guest
+    req.user = null;
+    next();
   }
 }
