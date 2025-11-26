@@ -1,4 +1,4 @@
-// 🟢 Backend deployed on Render
+// LIVE backend URL
 export const API_BASE_URL = "https://my-portfolio-9cfi.onrender.com";
 
 export const apiRequest = async (endpoint, method = "GET", body = null) => {
@@ -6,7 +6,7 @@ export const apiRequest = async (endpoint, method = "GET", body = null) => {
 
   const options = {
     method,
-    credentials: "include",
+    credentials: "include", // send cookies to backend
     headers: {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -18,10 +18,5 @@ export const apiRequest = async (endpoint, method = "GET", body = null) => {
   }
 
   const res = await fetch(`${API_BASE_URL}${endpoint}`, options);
-
-  if (res.status === 401) {
-    return { unauthorized: true };
-  }
-
   return res.json();
 };

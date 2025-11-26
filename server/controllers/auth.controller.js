@@ -8,17 +8,14 @@ export const signup = async (req, res) => {
   try {
     const { fullName, email, password, role } = req.body;
 
-    // Check if user already exists
     const exists = await User.findOne({ email });
-    if (exists)
-      return res.status(400).json({ message: "Email already registered" });
+    if (exists) return res.status(400).json({ message: "Email already registered" });
 
-    // Password hashing handled by Mongoose pre-save hook
     const user = await User.create({
       fullName,
       email,
       password,
-      role: role || "user"
+      role: role || "user",
     });
 
     return res.status(201).json({
@@ -27,8 +24,8 @@ export const signup = async (req, res) => {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -46,33 +43,29 @@ export const signin = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ message: "Invalid credentials" });
 
-    // Generate token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       config.jwtSecret,
       { expiresIn: "7d" }
     );
 
-    // Store token in cookie — localhost-friendly settings
-   res.cookie("jwt", token, {
-    httpOnly: true,
-    secure: true,          // required for HTTPS (Netlify)
-    sameSite: "None",      // allows cross-site cookies
-    path: "/",
-});
-
-
-
+    // Cross-site cookie (Render → Netlify)
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      path: "/",
+    });
 
     return res.json({
       message: "Signin successful",
-      token, // helps frontend AuthContext
+      token,
       user: {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
 
   } catch (err) {
@@ -83,13 +76,11 @@ export const signin = async (req, res) => {
 // SIGNOUT
 export const signout = (req, res) => {
   res.clearCookie("jwt", {
-  httpOnly: true,
-  secure: true,
-  sameSite: "None",
-  path: "/",
-});
-
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    path: "/",
+  });
 
   return res.status(200).json({ message: "Signout successful" });
 };
-
