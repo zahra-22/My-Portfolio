@@ -55,11 +55,12 @@ export const signin = async (req, res) => {
 
     // Store token in cookie — localhost-friendly settings
    res.cookie("jwt", token, {
-  httpOnly: true,
-  secure: false,
-  sameSite: "lax",
-  path: "/",
+    httpOnly: true,
+    secure: true,          // required for HTTPS (Netlify)
+    sameSite: "None",      // allows cross-site cookies
+    path: "/",
 });
+
 
 
 
@@ -82,11 +83,12 @@ export const signin = async (req, res) => {
 // SIGNOUT
 export const signout = (req, res) => {
   res.clearCookie("jwt", {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-    path: "/",
-  });
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+  path: "/",
+});
+
 
   return res.status(200).json({ message: "Signout successful" });
 };

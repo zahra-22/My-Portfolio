@@ -20,11 +20,14 @@ const allowedOrigins = [
 // CORS setup
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: [
+      "http://localhost:3000",
+      "https://zahra22-portfolio.netlify.app"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
-
 // Allow cookies (JWT) across domains
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Credentials", "true");
