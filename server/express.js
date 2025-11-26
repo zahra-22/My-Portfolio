@@ -3,8 +3,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 
 import authRoutes from "./routes/auth.routes.js";
-import userRoutes from "./routes/userRoutes.js";
-import contactRoutes from "./routes/contactRoutes.js";
+import userRoutes from "./routes/user.routes.js";
+import contactRoutes from "./routes/contact.routes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import qualificationRoutes from "./routes/qualificationRoutes.js";
 import authMiddleware from "./middleware/auth.middleware.js";

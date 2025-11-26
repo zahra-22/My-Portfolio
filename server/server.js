@@ -3,7 +3,7 @@ import app from "./express.js";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
-import contactRoutes from "./routes/contactRoutes.js";
+import contactRoutes from "./routes/contact.routes.js";
 import userRoutes from "./routes/user.routes.js";
 
 app.use(cookieParser());
