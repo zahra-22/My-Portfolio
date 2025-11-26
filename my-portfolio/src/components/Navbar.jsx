@@ -10,12 +10,19 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await apiRequest("/auth/signout", "GET");
-      setUser(null);
-      navigate("/signin");
+      await apiRequest("/api/auth/signout", "GET"); // backend logout (cookie clear)
     } catch (error) {
       console.error("Logout error:", error);
     }
+
+    // remove token stored in localStorage
+    localStorage.removeItem("token");
+
+    // reset frontend authentication
+    setUser(null);
+
+    // redirect to sign-in page
+    navigate("/signin");
   };
 
   return (
@@ -29,10 +36,16 @@ export default function Navbar() {
       <div className="nav-links">
         {!user && (
           <>
-            <NavLink to="/signup" className={({ isActive }) => (isActive ? "active" : "")}>
+            <NavLink
+              to="/signup"
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
               Signup
             </NavLink>
-            <NavLink to="/signin" className={({ isActive }) => (isActive ? "active" : "")}>
+            <NavLink
+              to="/signin"
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
               Signin
             </NavLink>
           </>
@@ -40,26 +53,38 @@ export default function Navbar() {
 
         {user && (
           <>
-            <NavLink to="/contact" className={({ isActive }) => (isActive ? "active" : "")}>
+            <NavLink
+              to="/contact"
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
               Contact
             </NavLink>
-            <NavLink to="/qualifications" className={({ isActive }) => (isActive ? "active" : "")}>
+            <NavLink
+              to="/qualifications"
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
               Qualifications
             </NavLink>
-            <NavLink to="/projects" className={({ isActive }) => (isActive ? "active" : "")}>
+            <NavLink
+              to="/projects"
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
               Projects
             </NavLink>
           </>
         )}
 
         {user?.role === "admin" && (
-          <NavLink to="/admin/contacts" className={({ isActive }) => (isActive ? "active" : "")}>
+          <NavLink
+            to="/admin/contacts"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
             Messages
           </NavLink>
         )}
       </div>
 
-      {/* Logout */}
+      {/* Logout Button */}
       {user && (
         <button className="logout-btn" onClick={handleLogout}>
           Logout

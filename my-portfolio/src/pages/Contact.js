@@ -1,9 +1,8 @@
-import React from "react";                                // ← ADD THIS
+import React from "react";
 import { useState, useEffect, useContext } from "react";
 import { apiRequest } from "../api.js";
 import { AuthContext } from "../context/AuthContext.jsx";
 import "../App.css";
-
 
 export default function Contact() {
   const { user } = useContext(AuthContext);
@@ -20,6 +19,7 @@ export default function Contact() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Load messages ONLY for admin
   useEffect(() => {
     if (isAdmin) fetchContacts();
   }, [isAdmin]);
@@ -42,32 +42,36 @@ export default function Contact() {
     const firstname = first;
     const lastname = rest.join(" ") || "N/A";
 
-    //  send all 5 fields to the backend
     const data = { firstname, lastname, email, phone, message };
 
     try {
-  if (editingId) {
-    if (!isAdmin) {
-      setError("Only admins can edit messages.");
-      return;
+      // Admin editing an existing message
+      if (editingId) {
+        if (!isAdmin) {
+          setError("Only admins can edit messages.");
+          return;
+        }
+        await apiRequest(`/api/contacts/${editingId}`, "PUT", data);
+        setEditingId(null);
+        setSuccess("Message updated!");
+      } 
+      // Normal user or admin submitting a NEW message
+      else {
+        await apiRequest("/api/contacts", "POST", data);
+        setSuccess("Message sent!");
+      }
+
+      // Reset form
+      setFullName("");
+      setEmail("");
+      setPhone("");
+      setMessage("");
+
+      if (isAdmin) fetchContacts();
+
+    } catch (err) {
+      setError("Something went wrong — please try again.");
     }
-    await apiRequest(`/api/contacts/${editingId}`, "PUT", data);
-    setEditingId(null);
-  } else {
-    await apiRequest("/api/contacts", "POST", data);
-  }
-
-  setSuccess("Saved successfully!");
-  setFullName("");
-  setEmail("");
-  setPhone("");
-  setMessage("");
-
-  if (isAdmin) fetchContacts();
-} catch (err) {
-  setError("Something went wrong — please try again.");
-}
-
   };
 
   const startEdit = (c) => {
@@ -93,42 +97,38 @@ export default function Contact() {
         {success && <p className="form-success">{success}</p>}
 
         <label htmlFor="fullName">Full Name</label>
-<input
-  id="fullName"
-  type="text"
-  value={fullName}
-  onChange={(e) => setFullName(e.target.value)}
-  required
-/>
-
+        <input
+          id="fullName"
+          type="text"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          required
+        />
 
         <label htmlFor="email">Email</label>
-<input
-  id="email"
-  type="email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  required
-/>
-
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
         <label htmlFor="phone">Phone</label>
-<input
-  id="phone"
-  type="text"
-  value={phone}
-  onChange={(e) => setPhone(e.target.value)}
-/>
-
+        <input
+          id="phone"
+          type="text"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
 
         <label htmlFor="message">Message</label>
-<textarea
-  id="message"
-  rows="4"
-  value={message}
-  onChange={(e) => setMessage(e.target.value)}
-></textarea>
-
+        <textarea
+          id="message"
+          rows="4"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        ></textarea>
 
         <button type="submit" className="btn-primary">
           {editingId ? "Update Message" : "Send Message"}
