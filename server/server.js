@@ -7,7 +7,8 @@ dotenv.config();
 // ROUTES
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
-import contactRoutes from "./routes/contactRoutes.js";
+import contactRoutes from "./routes/contact.routes.js";
+
 import authMiddleware from "./middleware/auth.middleware.js";
 
 const app = express(); // MUST come before app.use()
