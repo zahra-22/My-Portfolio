@@ -27,8 +27,8 @@ export default function Qualifications() {
 
   const loadQualifications = async () => {
     try {
-      const res = await apiRequest("/api/qualifications", "GET");
-      setQualifications(res);
+      const res = await apiRequest("/qualifications", "GET"); // FIXED
+      setQualifications(Array.isArray(res) ? res : []);
     } catch (err) {
       console.error(err);
     }
@@ -41,7 +41,7 @@ export default function Qualifications() {
     setSuccess("");
 
     try {
-      const res = await apiRequest("/api/qualifications", "POST", {
+      const res = await apiRequest("/qualifications", "POST", { // FIXED
         title,
         firstname,
         lastname,
@@ -50,16 +50,14 @@ export default function Qualifications() {
         description,
       });
 
-      if (res?.qualification) {
-        setSuccess("Qualification added!");
-        setTitle("");
-        setFirstname("");
-        setLastname("");
-        setEmail("");
-        setCompletion("");
-        setDescription("");
-        loadQualifications();
-      }
+      setSuccess("Qualification added!");
+      setTitle("");
+      setFirstname("");
+      setLastname("");
+      setEmail("");
+      setCompletion("");
+      setDescription("");
+      loadQualifications();
     } catch {
       setError("Only admins can add qualifications.");
     }
@@ -70,7 +68,7 @@ export default function Qualifications() {
     if (!window.confirm("Delete this qualification?")) return;
 
     try {
-      await apiRequest(`/api/qualifications/${id}`, "DELETE");
+      await apiRequest(`/qualifications/${id}`, "DELETE"); // FIXED
       loadQualifications();
     } catch {
       alert("Only admins can delete qualifications");
