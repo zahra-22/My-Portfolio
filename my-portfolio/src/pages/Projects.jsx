@@ -38,7 +38,7 @@ export default function Projects() {
     setSuccess("");
 
     try {
-      const res = await apiRequest("/projects", "POST", { // FIXED
+      await apiRequest("/projects", "POST", {   // 🔥 res removed (fix)
         title,
         description,
         link,
@@ -63,7 +63,7 @@ export default function Projects() {
 
   const handleUpdate = async (id) => {
     try {
-      await apiRequest(`/projects/${id}`, "PUT", { // FIXED
+      await apiRequest(`/projects/${id}`, "PUT", {   // FIXED
         title: editTitle,
         description: editDescription,
         link: editLink,
@@ -122,19 +122,13 @@ export default function Projects() {
             <div key={project._id} className="project-card">
               {editingId === project._id ? (
                 <>
-                  <input
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                  />
+                  <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                   <textarea
                     rows="3"
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                   ></textarea>
-                  <input
-                    value={editLink}
-                    onChange={(e) => setEditLink(e.target.value)}
-                  />
+                  <input value={editLink} onChange={(e) => setEditLink(e.target.value)} />
 
                   <button onClick={() => handleUpdate(project._id)} className="btn-primary">
                     Save
