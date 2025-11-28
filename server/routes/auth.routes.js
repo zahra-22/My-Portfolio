@@ -1,11 +1,10 @@
-// server/routes/auth.routes.js
 import express from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 
 const router = express.Router();
 
-// SIGNUP (no bcrypt, plain password for now)
+// SIGNUP
 router.post("/signup", async (req, res) => {
   try {
     const { fullName, email, password, role } = req.body;
@@ -22,7 +21,7 @@ router.post("/signup", async (req, res) => {
     const user = await User.create({
       fullName,
       email,
-      password,          // ⚠ plain text for simplicity
+      password, // plain text for now
       role: role || "user",
     });
 
@@ -40,7 +39,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// SIGNIN (simple password check)
+// SIGNIN
 router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -50,21 +49,16 @@ router.post("/signin", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({ message: "JWT_SECRET not configured" });
-    }
-
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Cookie for auth/me
-    res.cookie("jwt", token, {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: false,      // local dev
-      sameSite: "Lax",
+      secure: true,        // required for cross-site cookies
+      sameSite: "None",    // required for cross-site cookies
       path: "/",
     });
 
@@ -82,13 +76,22 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-// AUTH ME - return logged-in user
+// SIGNOUT 🚀 (fixes logout crash)
+router.post("/signout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    path: "/",
+  });
+  return res.json({ message: "Signed out successfully" });
+});
+
+// AUTH ME
 router.get("/me", async (req, res) => {
   try {
-    const token = req.cookies.jwt;
-    if (!token || !process.env.JWT_SECRET) {
-      return res.json(null);
-    }
+    const token = req.cookies.token;
+    if (!token) return res.json(null);
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select("-password");
