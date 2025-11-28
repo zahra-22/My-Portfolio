@@ -32,6 +32,11 @@ export default function Home() {
           )}
         </>
       )}
+
+      {/* 👇 This paragraph is the CI/CD update */}
+      <p style={{ marginTop: "20px" }}>
+        This portfolio continues to evolve as I enhance my skills in full-stack development and cloud deployment.
+      </p>
     </section>
   );
 }
