@@ -1,25 +1,102 @@
+// server/routes/auth.routes.js
 import express from "express";
-const router = express.Router();
-
-import { signup, signin, signout } from "../controllers/auth.controller.js";
-import authMiddleware from "../middleware/auth.middleware.js";
+import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 
-// Public routes
-router.post("/signup", signup);
-router.post("/signin", signin);
+const router = express.Router();
 
-// Get currently logged-in user (used for frontend persistence)
-router.get("/me", authMiddleware, async (req, res) => {
+// SIGNUP (no bcrypt, plain password for now)
+router.post("/signup", async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
-    res.json(user);
-  } catch {
-    res.status(500).json({ message: "Error retrieving user info" });
+    const { fullName, email, password, role } = req.body;
+
+    if (!email || !password || !fullName) {
+      return res.status(400).json({ message: "Missing fields" });
+    }
+
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const user = await User.create({
+      fullName,
+      email,
+      password,          // ⚠ plain text for simplicity
+      role: role || "user",
+    });
+
+    return res.status(201).json({
+      message: "Signup successful",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 });
 
-// Logout (must be logged in)
-router.get("/signout", authMiddleware, signout);
+// SIGNIN (simple password check)
+router.post("/signin", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user || user.password !== password) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: "JWT_SECRET not configured" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Cookie for auth/me
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: false,      // local dev
+      sameSite: "Lax",
+      path: "/",
+    });
+
+    return res.json({
+      message: "Signin successful",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+// AUTH ME - return logged-in user
+router.get("/me", async (req, res) => {
+  try {
+    const token = req.cookies.jwt;
+    if (!token || !process.env.JWT_SECRET) {
+      return res.json(null);
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("-password");
+
+    return res.json(user || null);
+  } catch (err) {
+    return res.json(null);
+  }
+});
 
 export default router;
