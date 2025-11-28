@@ -1,10 +1,11 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 
 const router = express.Router();
 
-// SIGNUP
+/* ─────────────────────────────── SIGNUP ─────────────────────────────── */
 router.post("/signup", async (req, res) => {
   try {
     const { fullName, email, password, role } = req.body;
@@ -18,10 +19,11 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
+    // Store as plain text (matching current assignment requirements)
     const user = await User.create({
       fullName,
       email,
-      password, // plain text for now
+      password,
       role: role || "user",
     });
 
@@ -39,13 +41,25 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// SIGNIN
+/* ─────────────────────────────── SIGNIN ─────────────────────────────── */
+/* Supports BOTH:
+   ✔ old accounts where password was hashed
+   ✔ new accounts stored in plain text
+*/
 router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user || user.password !== password) {
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Compare hashed OR plain
+    const hashedMatch = await bcrypt.compare(password, user.password);
+    const plainMatch = user.password === password;
+
+    if (!hashedMatch && !plainMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -57,8 +71,8 @@ router.post("/signin", async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,        // required for cross-site cookies
-      sameSite: "None",    // required for cross-site cookies
+      secure: true,          // required for HTTPS
+      sameSite: "None",      // required for Netlify + Render
       path: "/",
     });
 
@@ -76,7 +90,7 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-// SIGNOUT 🚀 (fixes logout crash)
+/* ─────────────────────────────── SIGNOUT ─────────────────────────────── */
 router.post("/signout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -87,7 +101,7 @@ router.post("/signout", (req, res) => {
   return res.json({ message: "Signed out successfully" });
 });
 
-// AUTH ME
+/* ─────────────────────────────── AUTH / ME ─────────────────────────────── */
 router.get("/me", async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -97,7 +111,7 @@ router.get("/me", async (req, res) => {
     const user = await User.findById(decoded.id).select("-password");
 
     return res.json(user || null);
-  } catch (err) {
+  } catch {
     return res.json(null);
   }
 });
