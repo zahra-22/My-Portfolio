@@ -23,20 +23,14 @@ export default function Projects() {
   }, []);
 
   const loadProjects = async () => {
-  try {
-    const res = await apiRequest("/api/projects", "GET");
-
-    if (Array.isArray(res)) {
-      setProjects(res);   // good data
-    } else {
-      setProjects([]);    // fallback if API sends something unexpected
+    try {
+      const res = await apiRequest("/projects", "GET"); // FIXED
+      setProjects(Array.isArray(res) ? res : []);
+    } catch (err) {
+      console.error(err);
+      setProjects([]);
     }
-  } catch (err) {
-    console.error(err);
-    setProjects([]);      // prevent blank screen
-  }
-};
-
+  };
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -44,21 +38,17 @@ export default function Projects() {
     setSuccess("");
 
     try {
-      const res = await apiRequest("/api/projects", "POST", {
+      const res = await apiRequest("/projects", "POST", { // FIXED
         title,
         description,
         link,
       });
 
-      if (res?.project) {
-        setSuccess("Project added successfully!");
-        setTitle("");
-        setDescription("");
-        setLink("");
-        loadProjects();
-      } else {
-        setError(res.message || "Failed to add project");
-      }
+      setSuccess("Project added successfully!");
+      setTitle("");
+      setDescription("");
+      setLink("");
+      loadProjects();
     } catch {
       setError("Only admins can add projects");
     }
@@ -73,7 +63,7 @@ export default function Projects() {
 
   const handleUpdate = async (id) => {
     try {
-      await apiRequest(`/api/projects/${id}`, "PUT", {
+      await apiRequest(`/projects/${id}`, "PUT", { // FIXED
         title: editTitle,
         description: editDescription,
         link: editLink,
@@ -89,7 +79,7 @@ export default function Projects() {
     if (!window.confirm("Are you sure you want to delete this project?")) return;
 
     try {
-      await apiRequest(`/api/projects/${id}`, "DELETE");
+      await apiRequest(`/projects/${id}`, "DELETE"); // FIXED
       loadProjects();
     } catch {
       alert("Only admins can delete projects");
@@ -101,7 +91,6 @@ export default function Projects() {
       <h2>Projects</h2>
       <p>Portfolio projects displayed below</p>
 
-      {/* Admin — Add new project */}
       {user?.role === "admin" && (
         <form onSubmit={handleAdd} className="form-container">
           {error && <p className="form-error">{error}</p>}
@@ -125,9 +114,8 @@ export default function Projects() {
         </form>
       )}
 
-      {/* ---- Project list (public) ---- */}
       <div className="project-list">
-        {!Array.isArray(projects) || projects.length === 0 ? (
+        {projects.length === 0 ? (
           <p>No projects added yet</p>
         ) : (
           projects.map((project) => (
@@ -165,7 +153,6 @@ export default function Projects() {
                     </a>
                   )}
 
-                  {/* Admin controls */}
                   {user?.role === "admin" && (
                     <div className="project-controls">
                       <button onClick={() => startEditing(project)}>Edit</button>

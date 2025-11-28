@@ -8,7 +8,6 @@ export default function AdminContacts() {
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState("");
 
-  // Load messages when admin logs in
   useEffect(() => {
     if (user?.role === "admin") loadMessages();
   }, [user]);
@@ -16,12 +15,7 @@ export default function AdminContacts() {
   const loadMessages = async () => {
     try {
       const res = await apiRequest("/contacts", "GET"); // FIXED
-      if (Array.isArray(res)) {
-        setMessages(res);
-      } else {
-        setMessages([]);
-        setError("Unable to fetch messages");
-      }
+      setMessages(Array.isArray(res) ? res : []);
     } catch {
       setError("Failed to load messages");
     }
@@ -57,13 +51,10 @@ export default function AdminContacts() {
             <div className="message-list">
               {messages.map((msg) => (
                 <div key={msg._id} className="message-card">
-                  <h3>
-                    {msg.firstname} {msg.lastname}
-                  </h3>
+                  <h3>{msg.firstname} {msg.lastname}</h3>
                   <p><strong>Email:</strong> {msg.email}</p>
                   <p><strong>Phone:</strong> {msg.phone || "—"}</p>
                   <p><strong>Message:</strong> {msg.message}</p>
-
                   <button
                     className="danger"
                     onClick={() => handleDelete(msg._id)}
