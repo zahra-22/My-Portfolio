@@ -15,9 +15,7 @@ export default function AdminContacts() {
 
   const loadMessages = async () => {
     try {
-      const res = await apiRequest("/api/contacts", "GET");
-
-      // defensive check — only accept arrays
+      const res = await apiRequest("/contacts", "GET"); // FIXED
       if (Array.isArray(res)) {
         setMessages(res);
       } else {
@@ -32,7 +30,7 @@ export default function AdminContacts() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this message?")) return;
     try {
-      await apiRequest(`/api/contacts/${id}`, "DELETE");
+      await apiRequest(`/contacts/${id}`, "DELETE"); // FIXED
       loadMessages();
     } catch {
       alert("Only admins can delete messages");

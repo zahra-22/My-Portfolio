@@ -1,5 +1,5 @@
 // LIVE backend URL
-export const API_BASE_URL = "https://my-portfolio-9cfi.onrender.com";
+export const API_BASE_URL = "https://my-portfolio-9cfi.onrender.com/api";
 
 export const apiRequest = async (endpoint, method = "GET", body = null) => {
   const token = localStorage.getItem("token");

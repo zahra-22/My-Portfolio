@@ -26,7 +26,7 @@ export default function Contact() {
 
   const fetchContacts = async () => {
     try {
-      const res = await apiRequest("/api/contacts", "GET");
+      const res = await apiRequest("/contacts", "GET"); // FIXED
       if (Array.isArray(res)) setContacts(res);
     } catch (err) {
       console.error(err);
@@ -51,13 +51,13 @@ export default function Contact() {
           setError("Only admins can edit messages.");
           return;
         }
-        await apiRequest(`/api/contacts/${editingId}`, "PUT", data);
+        await apiRequest(`/contacts/${editingId}`, "PUT", data); // FIXED
         setEditingId(null);
         setSuccess("Message updated!");
       } 
-      // Normal user or admin submitting a NEW message
+      // Normal user or admin submitting NEW message
       else {
-        await apiRequest("/api/contacts", "POST", data);
+        await apiRequest("/contacts", "POST", data); // FIXED
         setSuccess("Message sent!");
       }
 
@@ -84,7 +84,7 @@ export default function Contact() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this contact?")) return;
-    await apiRequest(`/api/contacts/${id}`, "DELETE");
+    await apiRequest(`/contacts/${id}`, "DELETE"); // FIXED
     fetchContacts();
   };
 
