@@ -17,17 +17,19 @@ function Signin() {
     setError("");
 
     try {
-      const res = await apiRequest("/api/auth/signin", "POST", { email, password });
+      // FIXED: Removed duplicate "/api"
+      const res = await apiRequest("/auth/signin", "POST", { email, password });
 
-      //  Save token for future requests
+      if (!res || !res.token) {
+        setError("Invalid email or password");
+        return;
+      }
+
+      // Save token and user
       localStorage.setItem("token", res.token);
-
-      //  Store logged-in user globally
       setUser(res.user);
 
-      //  Navigate to dashboard/home
       navigate("/");
-
     } catch (err) {
       setError("Invalid email or password");
     }

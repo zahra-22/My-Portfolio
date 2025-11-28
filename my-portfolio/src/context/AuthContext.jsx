@@ -10,7 +10,8 @@ export default function AuthProvider({ children }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await apiRequest("/api/auth/me", "GET");
+        // FIXED: removed duplicate /api — now it matches the backend route
+        const res = await apiRequest("/auth/me", "GET");
 
         if (res && res._id) {
           setUser(res);

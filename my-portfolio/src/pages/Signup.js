@@ -18,7 +18,8 @@ export default function Signup() {
     setSuccess("");
 
     try {
-      const res = await apiRequest("/api/auth/signup", "POST", {
+      // FIXED: removed duplicate "/api"
+      const res = await apiRequest("/auth/signup", "POST", {
         fullName,
         email,
         password
@@ -28,7 +29,7 @@ export default function Signup() {
         setSuccess("Account created! Redirecting to Sign In...");
         setTimeout(() => navigate("/signin"), 1200);
       } else {
-        setError(res.message || "Signup failed");
+        setError(res?.message || "Signup failed");
       }
     } catch (err) {
       setError("Signup failed — please try again.");
