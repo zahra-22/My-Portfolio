@@ -49,17 +49,17 @@ export const signin = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    // Cross-site cookie (Render → Netlify)
-    res.cookie("jwt", token, {
+    // Send auth token to browser (Required for Netlify + Render cross-domain)
+    res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
+      sameSite: "None",   // MUST be capital N
       path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     return res.json({
       message: "Signin successful",
-      token,
       user: {
         id: user._id,
         fullName: user.fullName,
@@ -75,7 +75,7 @@ export const signin = async (req, res) => {
 
 // SIGNOUT
 export const signout = (req, res) => {
-  res.clearCookie("jwt", {
+  res.clearCookie("token", {
     httpOnly: true,
     secure: true,
     sameSite: "None",
