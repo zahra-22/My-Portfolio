@@ -4,7 +4,7 @@ import { apiRequest } from "../api.js";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 
-function Signin() {
+export default function Signin() {
   const navigate = useNavigate();
   const { setUser } = useContext(AuthContext);
 
@@ -17,15 +17,16 @@ function Signin() {
     setError("");
 
     try {
-      // FIXED: Removed duplicate "/api"
-      const res = await apiRequest("/auth/signin", "POST", { email, password });
+      const res = await apiRequest("/api/auth/signin", "POST", {
+        email,
+        password,
+      });
 
       if (!res || !res.token) {
         setError("Invalid email or password");
         return;
       }
 
-      // Save token and user
       localStorage.setItem("token", res.token);
       setUser(res.user);
 
@@ -68,5 +69,3 @@ function Signin() {
     </section>
   );
 }
-
-export default Signin;

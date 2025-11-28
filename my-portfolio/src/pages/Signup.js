@@ -18,20 +18,21 @@ export default function Signup() {
     setSuccess("");
 
     try {
-      // FIXED: removed duplicate "/api"
-      const res = await apiRequest("/auth/signup", "POST", {
+      // ✅ IMPORTANT: include /api here to match backend route
+      const res = await apiRequest("/api/auth/signup", "POST", {
         fullName,
         email,
-        password
+        password,
       });
 
-      if (res?.user) {
+      // backend returns: { message, user: { ... } } on success
+      if (res && res.user) {
         setSuccess("Account created! Redirecting to Sign In...");
         setTimeout(() => navigate("/signin"), 1200);
       } else {
         setError(res?.message || "Signup failed");
       }
-    } catch (err) {
+    } catch {
       setError("Signup failed — please try again.");
     }
   };

@@ -8,76 +8,54 @@ export default function Qualifications() {
   const isAdmin = user?.role === "admin";
 
   const [qualifications, setQualifications] = useState([]);
-
   const [title, setTitle] = useState("");
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [completion, setCompletion] = useState("");
   const [description, setDescription] = useState("");
-
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    loadQualifications();
+    loadQuals();
   }, []);
 
-  const loadQualifications = async () => {
-    try {
-      const res = await apiRequest("/qualifications", "GET");
-      setQualifications(Array.isArray(res) ? res : []);
-    } catch (err) {
-      console.error(err);
-    }
+  const loadQuals = async () => {
+    const res = await apiRequest("/api/qualifications", "GET");
+    setQualifications(Array.isArray(res) ? res : []);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setError(""); setSuccess("");
 
     try {
-      await apiRequest("/qualifications", "POST", {   // 🔥 res removed
-        title,
-        firstname,
-        lastname,
-        email,
-        completion,
-        description,
+      await apiRequest("/api/qualifications", "POST", {
+        title, firstname, lastname, email, completion, description
       });
-
       setSuccess("Qualification added!");
-      setTitle("");
-      setFirstname("");
-      setLastname("");
-      setEmail("");
-      setCompletion("");
-      setDescription("");
-      loadQualifications();
+
+      setTitle(""); setFirstname(""); setLastname(""); setEmail("");
+      setCompletion(""); setDescription("");
+      loadQuals();
     } catch {
-      setError("Only admins can add qualifications.");
+      setError("Only admins can add qualifications");
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this qualification?")) return;
-
-    try {
-      await apiRequest(`/qualifications/${id}`, "DELETE");
-      loadQualifications();
-    } catch {
-      alert("Only admins can delete qualifications");
-    }
+    await apiRequest(`/api/qualifications/${id}`, "DELETE");
+    loadQuals();
   };
 
   return (
     <section className="center-section">
       <h2>Qualifications</h2>
-      <p>List of education and certifications</p>
 
       {isAdmin && (
-        <form onSubmit={handleSubmit} className="form-container">
+        <form className="form-container" onSubmit={handleSubmit}>
           {error && <p className="form-error">{error}</p>}
           {success && <p className="form-success">{success}</p>}
 
@@ -94,28 +72,18 @@ export default function Qualifications() {
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
 
           <label>Completion Date</label>
-          <input
-            type="date"
-            value={completion}
-            onChange={(e) => setCompletion(e.target.value)}
-            required
-          />
+          <input type="date" value={completion} onChange={(e) => setCompletion(e.target.value)} required />
 
           <label>Description</label>
-          <textarea
-            rows="3"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          ></textarea>
+          <textarea rows="3" value={description} onChange={(e) => setDescription(e.target.value)} required />
 
-          <button className="btn-primary" type="submit">Add Qualification</button>
+          <button className="btn-primary">Add Qualification</button>
         </form>
       )}
 
       <div className="qualification-list">
         {qualifications.length === 0 ? (
-          <p>No qualifications available.</p>
+          <p>No qualifications yet.</p>
         ) : (
           qualifications.map((q) => (
             <div key={q._id} className="qualification-card">
@@ -125,13 +93,7 @@ export default function Qualifications() {
               <p>{q.description}</p>
 
               {isAdmin && (
-                <button
-                  onClick={() => handleDelete(q._id)}
-                  style={{ marginTop: "10px" }}
-                  className="danger"
-                >
-                  Delete
-                </button>
+                <button className="danger" onClick={() => handleDelete(q._id)}>Delete</button>
               )}
             </div>
           ))

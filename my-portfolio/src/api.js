@@ -1,22 +1,12 @@
-// LIVE backend URL
-export const API_BASE_URL = "https://my-portfolio-9cfi.onrender.com/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-export const apiRequest = async (endpoint, method = "GET", body = null) => {
-  const token = localStorage.getItem("token");
-
-  const options = {
+export const apiRequest = async (url, method = "GET", body) => {
+  const res = await fetch(BASE_URL + url, {
     method,
-    credentials: "include", // send cookies to backend
-    headers: {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
-  };
+    headers: { "Content-Type": "application/json" },
+    credentials: "include", // needed for cookies
+    body: body ? JSON.stringify(body) : undefined,
+  });
 
-  if (body) {
-    options.body = JSON.stringify(body);
-  }
-
-  const res = await fetch(`${API_BASE_URL}${endpoint}`, options);
-  return res.json();
+  return await res.json();
 };

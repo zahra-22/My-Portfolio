@@ -5,6 +5,7 @@ import "../App.css";
 
 export default function Projects() {
   const { user } = useContext(AuthContext);
+  const isAdmin = user?.role === "admin";
 
   const [projects, setProjects] = useState([]);
   const [title, setTitle] = useState("");
@@ -24,10 +25,9 @@ export default function Projects() {
 
   const loadProjects = async () => {
     try {
-      const res = await apiRequest("/projects", "GET"); // FIXED
+      const res = await apiRequest("/api/projects", "GET");
       setProjects(Array.isArray(res) ? res : []);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setProjects([]);
     }
   };
@@ -38,13 +38,8 @@ export default function Projects() {
     setSuccess("");
 
     try {
-      await apiRequest("/projects", "POST", {   // 🔥 res removed (fix)
-        title,
-        description,
-        link,
-      });
-
-      setSuccess("Project added successfully!");
+      await apiRequest("/api/projects", "POST", { title, description, link });
+      setSuccess("Project added!");
       setTitle("");
       setDescription("");
       setLink("");
@@ -54,16 +49,16 @@ export default function Projects() {
     }
   };
 
-  const startEditing = (project) => {
-    setEditingId(project._id);
-    setEditTitle(project.title);
-    setEditDescription(project.description);
-    setEditLink(project.link);
+  const startEditing = (p) => {
+    setEditingId(p._id);
+    setEditTitle(p.title);
+    setEditDescription(p.description);
+    setEditLink(p.link);
   };
 
   const handleUpdate = async (id) => {
     try {
-      await apiRequest(`/projects/${id}`, "PUT", {   // FIXED
+      await apiRequest(`/api/projects/${id}`, "PUT", {
         title: editTitle,
         description: editDescription,
         link: editLink,
@@ -76,23 +71,21 @@ export default function Projects() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this project?")) return;
-
+    if (!window.confirm("Delete this project?")) return;
     try {
-      await apiRequest(`/projects/${id}`, "DELETE"); // FIXED
+      await apiRequest(`/api/projects/${id}`, "DELETE");
       loadProjects();
     } catch {
-      alert("Only admins can delete projects");
+      alert("Only admins can delete");
     }
   };
 
   return (
     <section className="center-section">
       <h2>Projects</h2>
-      <p>Portfolio projects displayed below</p>
 
-      {user?.role === "admin" && (
-        <form onSubmit={handleAdd} className="form-container">
+      {isAdmin && (
+        <form className="form-container" onSubmit={handleAdd}>
           {error && <p className="form-error">{error}</p>}
           {success && <p className="form-success">{success}</p>}
 
@@ -100,59 +93,40 @@ export default function Projects() {
           <input value={title} onChange={(e) => setTitle(e.target.value)} required />
 
           <label>Description</label>
-          <textarea
-            value={description}
-            rows="3"
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          ></textarea>
+          <textarea rows="3" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
 
-          <label>Link (optional)</label>
+          <label>Link</label>
           <input value={link} onChange={(e) => setLink(e.target.value)} />
 
-          <button type="submit" className="btn-primary">Add Project</button>
+          <button className="btn-primary">Add Project</button>
         </form>
       )}
 
       <div className="project-list">
         {projects.length === 0 ? (
-          <p>No projects added yet</p>
+          <p>No projects added yet.</p>
         ) : (
-          projects.map((project) => (
-            <div key={project._id} className="project-card">
-              {editingId === project._id ? (
+          projects.map((p) => (
+            <div className="project-card" key={p._id}>
+              {editingId === p._id ? (
                 <>
                   <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                  <textarea
-                    rows="3"
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                  ></textarea>
+                  <textarea rows="3" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} />
                   <input value={editLink} onChange={(e) => setEditLink(e.target.value)} />
 
-                  <button onClick={() => handleUpdate(project._id)} className="btn-primary">
-                    Save
-                  </button>
-                  <button onClick={() => setEditingId(null)} className="btn-secondary">
-                    Cancel
-                  </button>
+                  <button className="btn-primary" onClick={() => handleUpdate(p._id)}>Save</button>
+                  <button className="btn-secondary" onClick={() => setEditingId(null)}>Cancel</button>
                 </>
               ) : (
                 <>
-                  <h3>{project.title}</h3>
-                  <p>{project.description}</p>
-                  {project.link && (
-                    <a href={project.link} target="_blank" rel="noreferrer">
-                      Visit Project
-                    </a>
-                  )}
+                  <h3>{p.title}</h3>
+                  <p>{p.description}</p>
+                  {p.link && <a href={p.link} target="_blank" rel="noreferrer">Visit Project</a>}
 
-                  {user?.role === "admin" && (
+                  {isAdmin && (
                     <div className="project-controls">
-                      <button onClick={() => startEditing(project)}>Edit</button>
-                      <button onClick={() => handleDelete(project._id)} className="danger">
-                        Delete
-                      </button>
+                      <button onClick={() => startEditing(p)}>Edit</button>
+                      <button className="danger" onClick={() => handleDelete(p._id)}>Delete</button>
                     </div>
                   )}
                 </>

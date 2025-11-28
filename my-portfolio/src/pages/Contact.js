@@ -1,4 +1,3 @@
-import React from "react";
 import { useState, useEffect, useContext } from "react";
 import { apiRequest } from "../api.js";
 import { AuthContext } from "../context/AuthContext.jsx";
@@ -15,155 +14,105 @@ export default function Contact() {
 
   const [contacts, setContacts] = useState([]);
   const [editingId, setEditingId] = useState(null);
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Load messages ONLY for admin
   useEffect(() => {
-    if (isAdmin) fetchContacts();
+    if (isAdmin) loadMessages();
   }, [isAdmin]);
 
-  const fetchContacts = async () => {
-    try {
-      const res = await apiRequest("/contacts", "GET"); // FIXED
-      if (Array.isArray(res)) setContacts(res);
-    } catch (err) {
-      console.error(err);
-    }
+  const loadMessages = async () => {
+    const res = await apiRequest("/api/contacts", "GET");
+    if (Array.isArray(res)) setContacts(res);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setError(""); setSuccess("");
 
     const [first, ...rest] = fullName.trim().split(" ");
-    const firstname = first;
-    const lastname = rest.join(" ") || "N/A";
-
-    const data = { firstname, lastname, email, phone, message };
+    const data = {
+      firstname: first,
+      lastname: rest.join(" ") || "N/A",
+      email,
+      phone,
+      message
+    };
 
     try {
-      // Admin editing an existing message
       if (editingId) {
-        if (!isAdmin) {
-          setError("Only admins can edit messages.");
-          return;
-        }
-        await apiRequest(`/contacts/${editingId}`, "PUT", data); // FIXED
+        await apiRequest(`/api/contacts/${editingId}`, "PUT", data);
         setEditingId(null);
         setSuccess("Message updated!");
-      } 
-      // Normal user or admin submitting NEW message
-      else {
-        await apiRequest("/contacts", "POST", data); // FIXED
+      } else {
+        await apiRequest("/api/contacts", "POST", data);
         setSuccess("Message sent!");
       }
 
-      // Reset form
-      setFullName("");
-      setEmail("");
-      setPhone("");
-      setMessage("");
-
-      if (isAdmin) fetchContacts();
-
-    } catch (err) {
-      setError("Something went wrong — please try again.");
+      setFullName(""); setEmail(""); setPhone(""); setMessage("");
+      if (isAdmin) loadMessages();
+    } catch {
+      setError("Something went wrong.");
     }
   };
 
-  const startEdit = (c) => {
-    setEditingId(c._id);
-    setFullName(`${c.firstname} ${c.lastname}`);
-    setEmail(c.email);
-    setPhone(c.phone || "");
-    setMessage(c.message || "");
+  const startEdit = (m) => {
+    setEditingId(m._id);
+    setFullName(`${m.firstname} ${m.lastname}`);
+    setEmail(m.email);
+    setPhone(m.phone);
+    setMessage(m.message);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this contact?")) return;
-    await apiRequest(`/contacts/${id}`, "DELETE"); // FIXED
-    fetchContacts();
+    if (!window.confirm("Delete this message?")) return;
+    await apiRequest(`/api/contacts/${id}`, "DELETE");
+    loadMessages();
   };
 
   return (
     <section className="center-section">
-      <h2>Contact Me</h2>
+      <h2>Contact</h2>
 
-      <form onSubmit={handleSubmit} className="form-container">
+      <form className="form-container" onSubmit={handleSubmit}>
         {error && <p className="form-error">{error}</p>}
         {success && <p className="form-success">{success}</p>}
 
-        <label htmlFor="fullName">Full Name</label>
-        <input
-          id="fullName"
-          type="text"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          required
-        />
+        <label>Full Name</label>
+        <input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
 
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <label>Email</label>
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
 
-        <label htmlFor="phone">Phone</label>
-        <input
-          id="phone"
-          type="text"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
+        <label>Phone</label>
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} />
 
-        <label htmlFor="message">Message</label>
-        <textarea
-          id="message"
-          rows="4"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        ></textarea>
+        <label>Message</label>
+        <textarea rows="3" value={message} onChange={(e) => setMessage(e.target.value)} />
 
-        <button type="submit" className="btn-primary">
-          {editingId ? "Update Message" : "Send Message"}
-        </button>
+        <button className="btn-primary">{editingId ? "Update Message" : "Send Message"}</button>
       </form>
 
       {isAdmin && (
         <>
-          <h2>All Messages</h2>
-
+          <h2>Messages</h2>
           {contacts.length === 0 ? (
             <p>No messages yet.</p>
           ) : (
             <table className="contact-table">
               <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Message</th>
-                  <th>Actions</th>
-                </tr>
+                <tr><th>Name</th><th>Email</th><th>Phone</th><th>Message</th><th>Actions</th></tr>
               </thead>
               <tbody>
-                {contacts.map((c) => (
-                  <tr key={c._id}>
-                    <td>{c.firstname} {c.lastname}</td>
-                    <td>{c.email}</td>
-                    <td>{c.phone || "—"}</td>
-                    <td>{c.message || "—"}</td>
+                {contacts.map((m) => (
+                  <tr key={m._id}>
+                    <td>{m.firstname} {m.lastname}</td>
+                    <td>{m.email}</td>
+                    <td>{m.phone || "-"}</td>
+                    <td>{m.message || "-"}</td>
                     <td>
-                      <button onClick={() => startEdit(c)}>Edit</button>
-                      <button onClick={() => handleDelete(c._id)} className="danger">
-                        Delete
-                      </button>
+                      <button onClick={() => startEdit(m)}>Edit</button>
+                      <button className="danger" onClick={() => handleDelete(m._id)}>Delete</button>
                     </td>
                   </tr>
                 ))}
