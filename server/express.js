@@ -18,7 +18,6 @@ const app = express();
 const allowedOrigins = [
  "http://localhost:3000",
   "http://localhost:5001",
-  "https://zahra22-portfolio.netlify.app",
   "https://my-portfolio-1-a4aq.onrender.com"
 ];
 
