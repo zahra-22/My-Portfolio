@@ -1,26 +1,20 @@
-import config from "./config/config.js";
-import app from "./express.js";
-import mongoose from "mongoose";
-import cookieParser from "cookie-parser";
-import authRoutes from "./routes/auth.routes.js";
-import contactRoutes from "./routes/contact.routes.js";
-import userRoutes from "./routes/user.routes.js";
+import cors from "cors";
 
-app.use(cookieParser());
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://YOUR_NETLIFY_NAME.netlify.app"
+];
 
-// API route prefixes
-app.use("/api/auth", authRoutes);
-app.use("/api/contacts", contactRoutes);
-app.use("/api/users", userRoutes);
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 
-// DB connect
-mongoose
-  .connect(config.mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Connected to MongoDB:", mongoose.connection.name))
-  .catch((err) => console.error("Database error:", err));
-
-// Root
-app.get("/", (req, res) => res.send("Portfolio API running"));
-
-// Port
-app.listen(config.port, () => console.log(`Backend running on port ${config.port}`));
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  next();
+});
