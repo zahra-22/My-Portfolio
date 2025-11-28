@@ -9,7 +9,6 @@ export default function Qualifications() {
 
   const [qualifications, setQualifications] = useState([]);
 
-  // Form fields
   const [title, setTitle] = useState("");
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
@@ -20,28 +19,26 @@ export default function Qualifications() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  // Load qualifications on mount
   useEffect(() => {
     loadQualifications();
   }, []);
 
   const loadQualifications = async () => {
     try {
-      const res = await apiRequest("/qualifications", "GET"); // FIXED
+      const res = await apiRequest("/qualifications", "GET");
       setQualifications(Array.isArray(res) ? res : []);
     } catch (err) {
       console.error(err);
     }
   };
 
-  // ADD qualification (Admin only)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
     try {
-      const res = await apiRequest("/qualifications", "POST", { // FIXED
+      await apiRequest("/qualifications", "POST", {   // 🔥 res removed
         title,
         firstname,
         lastname,
@@ -63,12 +60,11 @@ export default function Qualifications() {
     }
   };
 
-  // DELETE qualification
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this qualification?")) return;
 
     try {
-      await apiRequest(`/qualifications/${id}`, "DELETE"); // FIXED
+      await apiRequest(`/qualifications/${id}`, "DELETE");
       loadQualifications();
     } catch {
       alert("Only admins can delete qualifications");
@@ -80,7 +76,6 @@ export default function Qualifications() {
       <h2>Qualifications</h2>
       <p>List of education and certifications</p>
 
-      {/* ADMIN FORM */}
       {isAdmin && (
         <form onSubmit={handleSubmit} className="form-container">
           {error && <p className="form-error">{error}</p>}
@@ -118,7 +113,6 @@ export default function Qualifications() {
         </form>
       )}
 
-      {/* QUALIFICATIONS LIST */}
       <div className="qualification-list">
         {qualifications.length === 0 ? (
           <p>No qualifications available.</p>
